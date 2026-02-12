@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ulsan Omakase Shorts</title>
+    <style>
+        :root {
+            --bg-color: #0c0c0c;
+            --text-color: #f5f5f5;
+            --accent-color: #d4af37;
+            /* Gold */
+            --naver-color: #03cf5d;
+            --glass-bg: rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #000;
+            color: var(--text-color);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Desktop Container to mimic Mobile */
+        .mobile-container {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            position: relative;
+            background: var(--bg-color);
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        .mobile-container::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Opera */
+        }
+
+        section {
+            width: 100%;
+            height: 100vh;
+            scroll-snap-align: start;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Horizontal Slider */
+        .slider-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            overflow-x: scroll;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .slider-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .slide {
+            flex: 0 0 100%;
+            width: 100%;
+            height: 100%;
+            scroll-snap-align: start;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .bg-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        /* Gradient Overlay for Slider */
+        .slide::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 40%, rgba(0, 0, 0, 0.95) 100%);
+            z-index: 1;
+        }
+
+        .content {
+            position: absolute;
+            bottom: 70px;
+            left: 20px;
+            right: 20px;
+            z-index: 5;
+            animation: fadeInUp 0.8s ease-out;
+            pointer-events: none;
+        }
+
+        .content * {
+            pointer-events: auto;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--accent-color);
+            color: #000;
+            font-weight: 800;
+            font-size: 11px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            line-height: 1.25;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.85);
+            /* Increased contrast */
+            line-height: 1.5;
+            margin-bottom: 24px;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        .description-detail {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .btn-map {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            background: var(--naver-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(3, 207, 93, 0.3);
+        }
+
+        .btn-map:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(3, 207, 93, 0.5);
+        }
+
+        /* Navigation Arrows */
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 18px;
+        }
+
+        .nav-arrow:active {
+            transform: translateY(-50%) scale(0.9);
+        }
+
+        .nav-arrow.left {
+            left: 12px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .nav-arrow.right {
+            right: 12px;
+        }
+
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--accent-color);
+            z-index: 100;
+            transition: width 0.1s linear;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="mobile-container" id="vertical-container">
+        <div class="progress-bar" id="progress"></div>
+
+        <!-- Section 1: Intro -->
+        <!-- Removed as per user request to show only specific info -->
+
+        <!-- 1. Sushi Kaiki -->
+        <section class="video-section">
+            <div class="slider-container" onscroll="updateArrows(this)">
+                <div class="slide">
+                    <video muted loop playsinline class="bg-video">
+                        <source
+                            src="https://a02-g-smp-vod.akamaized.net/moment/a/read/v2/VOD_ALPHA/moment/6F7545092E701FF6E3D2631BA81351FE18F9/trailer/1770556369449/0cde71a4-04f1-11f1-a2c9-a0369ffaba14.mp4?hdnts=exp%3D1770929012%7Eacl%3D%2Fmoment%2Fa%2Fread%2Fv2%2FVOD_ALPHA%2Fmoment%2F6F7545092E701FF6E3D2631BA81351FE18F9%2F*%7Ehmac%3D8108616248350285c3d3a76d9e83dc1d54d45053fa52f96e91b4f1f6fbeb6422#tid=8uR78fHnT5F_f1bfFDbojQ"
+                            type="video/mp4">
+                    </video>
+                </div>
+                <div class="slide">
+                    <video muted loop playsinline class="bg-video">
+                        <source
+                            src="https://a02-g-smp-vod.akamaized.net/clip-home/c/read/v2/VOD_ALPHA/clip-home/3BEDAD789F2D96C3278BF0AA2DC9A8327722/trailer/1768614071473/a7606295-f345-11f0-ba61-a0369ffddfdc.mp4?hdnts=exp%3D1770929012%7Eacl%3D%2Fclip-home%2Fc%2Fread%2Fv2%2FVOD_ALPHA%2Fclip-home%2F3BEDAD789F2D96C3278BF0AA2DC9A8327722%2F*%7Ehmac%3D4fec2fa5702e0f83869489de1352711209a56fa4814e144c8c31bf78e02e3024#tid=6NqvdE32SIP0vkjG172-fA"
+                            type="video/mp4">
+                    </video>
+                </div>
+                <div class="slide"
+                    style="background-image: url('https://search.pstatic.net/common/?src=https%3A%2F%2Fldb-phinf.pstatic.net%2F20230817_35%2F1692262777204QNRaA_JPEG%2FIMG_6610.JPG');">
+                </div>
+                <div class="slide"
+                    style="background-image: url('https://search.pstatic.net/common/?src=https%3A%2F%2Fldb-phinf.pstatic.net%2F20230817_84%2F1692262777267ibQfH_JPEG%2FIMG_6751.JPG');">
+                </div>
+            </div>
+            <button class="nav-arrow left" onclick="scrollH(this, -1)">❮</button>
+            <button class="nav-arrow right" onclick="scrollH(this, 1)">❯</button>
+            <div class="content">
+                <span class="badge">1. 일식당</span>
+                <h2>스시카이키</h2>
+                <span class="description-detail">23년 전통, 정통 에도마에</span>
+                <p>최상급 제철 식재료를 사용하는<br>울산 스시 오마카세의 자존심.</p>
+                <a href="https://naver.me/5pws27YY" target="_blank" class="btn-map">지도 보기</a>
+            </div>
+        </section>
+        <!-- 2. Miim -->
+        <section class="video-section">
+            <div class="slider-container" onscroll="updateArrows(this)">
+                <div class="slide">
+                    <video muted loop playsinline class="bg-video">
+                        <source
+                            src="https://a02-g-smp-vod.akamaized.net/moment/a/read/v2/VOD_ALPHA/moment_2024_10_15_1/bf3762b1-8abb-11ef-ac0a-a0369ffac2c0.mp4?hdnts=exp%3D1770926316%7Eacl%3D%2Fmoment%2Fa%2Fread%2Fv2%2FVOD_ALPHA%2Fmoment_2024_10_15_1%2F*%7Ehmac%3Dfd03e5aaa2c998f1a1e04fe1e95247561bea203f5a157bb3ad6646378bc5a0c5#tid=pgrzJIj5HpCfDFDeLq_K1g"
+                            type="video/mp4">
+                    </video>
+                </div>
+                <div class="slide">
+                    <video muted loop playsinline class="bg-video">
+                        <source
+                            src="https://a02-g-smp-vod.akamaized.net/moment/a/read/v2/VOD_ALPHA/moment_2024_02_29_0/7fdd778e-d667-11ee-8e9d-e4434b2a1c78.mp4?hdnts=exp%3D1770926316%7Eacl%3D%2Fmoment%2Fa%2Fread%2Fv2%2FVOD_ALPHA%2Fmoment_2024_02_29_0%2F*%7Ehmac%3D68516db94a97bd79ac33725838524eaa520d08e8a906ac2bd63fd402e86c3db7#tid=c61CDDaz6nHQgR11P6E64Q"
+                            type="video/mp4">
+                    </video>
+                </div>
+                <div class="slide"
+                    style="background-image: url('https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyNTA5MDFfNTUg%2FMDAxNzU2NzI3NDgyMDk4.-RdBCJ_uau8U5GnVWAayysVHPkurepCB0OS3cSQOGMgg.964iyxuufTGfMddXmc4TTEdjq3K13bynjnue87VKr5Yg.JPEG%2F20250831_182400.jpg.jpg%3Ftype%3Dw1500_60_sharpen');">
+                </div>
+                <div class="slide"
+                    style="background-image: url('https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyNTA5MDFfMjIz%2FMDAxNzU2NzI3NDgyNTkz.GQbBOcFUX5he3XweKxeRWpEF9K6ZQsrMvvmRCB_JZc0g.RpFL4l5Ybg_RVffnodTbYqcwWZ4idx9wYvG-2lRYVp0g.JPEG%2F20250831_184024.jpg.jpg%3Ftype%3Dw1500_60_sharpen');">
+                </div>
+            </div>
+            <button class="nav-arrow left" onclick="scrollH(this, -1)">❮</button>
+            <button class="nav-arrow right" onclick="scrollH(this, 1)">❯</button>
+            <div class="content">
+                <span class="badge">2. 한식당</span>
+                <h2>미임</h2>
+                <p>정갈하고 깊은 맛의 한식.<br>마음까지 따뜻해지는 한 끼.</p>
+                <a href="https://naver.me/5fIpYgao" target="_blank" class="btn-map">지도 보기</a>
+            </div>
+        </section>
+
+        <!-- 3. Mawang Dining -->
+        <section class="video-section">
+            <div class="slider-container" onscroll="updateArrows(this)">
+                <div class="slide">
+                    <video muted loop playsinline class="bg-video">
+                        <source
+                            src="https://a02-g-smp-vod.akamaized.net/clip-home/c/read/v2/VOD_ALPHA/clip-home/35B27E45DAF8BE67FBBD4942ABB4CE7E0336/trailer/1762921271370/1437fa81-bf7f-11f0-806d-a0369ffdaf34.mp4?hdnts=exp%3D1770929042%7Eacl%3D%2Fclip-home%2Fc%2Fread%2Fv2%2FVOD_ALPHA%2Fclip-home%2F35B27E45DAF8BE67FBBD4942ABB4CE7E0336%2F*%7Ehmac%3De486557cc6091b7abe92352ba646485ac74f66d570336312603e7954a98b5fa5#tid=flA0rfo9RaZ29wdm_J0AxQ"
+                            type="video/mp4">
+                    </video>
+                </div>
+                <div class="slide">
+                    <video muted loop playsinline class="bg-video">
+                        <source
+                            src="https://a02-g-smp-vod.akamaized.net/moment/a/read/v2/VOD_ALPHA/moment/778BDC6AB11FEFB367ED2ED77513BF3C5C0F/trailer/1759154745005/3a08e5d1-9d3e-11f0-9f30-a0369ffbdf50.mp4?hdnts=exp%3D1770924663%7Eacl%3D%2Fmoment%2Fa%2Fread%2Fv2%2FVOD_ALPHA%2Fmoment%2F778BDC6AB11FEFB367ED2ED77513BF3C5C0F%2F*%7Ehmac%3D386238f59fc979375bc6eabcc23d233682b135b15b521b855b10349c8f90c2ac#tid=zlDmPELWmTFA-az1Xk51tQ"
+                            type="video/mp4">
+                    </video>
+                </div>
+                <div class="slide"
+                    style="background-image: url('https://search.pstatic.net/common/?src=https%3A%2F%2Fldb-phinf.pstatic.net%2F20251119_221%2F1763555328299VVtXT_JPEG%2F1000001214.jpg');">
+                </div>
+                <div class="slide"
+                    style="background-image: url('https://search.pstatic.net/common/?src=https%3A%2F%2Fldb-phinf.pstatic.net%2F20251119_266%2F1763555328348lpaTh_JPEG%2F1000001200.jpg');">
+                </div>
+            </div>
+            <button class="nav-arrow left" onclick="scrollH(this, -1)">❮</button>
+            <button class="nav-arrow right" onclick="scrollH(this, 1)">❯</button>
+            <div class="content">
+                <span class="badge">3. 일식당</span>
+                <h2>마왕다이닝</h2>
+                <p>압도적인 비주얼과 맛의 향연.<br>특별한 날을 위한 다이닝.</p>
+                <a href="https://naver.me/x3jF95Jd" target="_blank" class="btn-map">지도 보기</a>
+            </div>
+        </section>
+
+        <!-- 4. Mugando -->
+        <section class="video-section">
+            <div class="slider-container" onscroll="updateArrows(this)">
+                <div class="slide">
+                    <video muted loop playsinline class="bg-video">
+                        <source
+                            src="https://a02-g-smp-vod.akamaized.net/clip-home/c/read/v2/VOD_ALPHA/clip-home/384D29C1011D1A123D145AC63DA5D5C2FDD0/trailer/1770123347885/b74bbad2-00ff-11f1-a6cf-a0369ffd9e34.mp4?hdnts=exp%3D1770928456%7Eacl%3D%2Fclip-home%2Fc%2Fread%2Fv2%2FVOD_ALPHA%2Fclip-home%2F384D29C1011D1A123D145AC63DA5D5C2FDD0%2F*%7Ehmac%3D1a4b6e8b2d85e7380aaefc88cb3f156863e2e314273edb779af976701a6e9bb2#tid=aKX_N3fJiHgM_rv_D_v-cQ"
+                            type="video/mp4">
+                    </video>
+                </div>
+                <div class="slide">
+                    <video muted loop playsinline class="bg-video">
+                        <source
+                            src="https://a02-g-smp-vod.akamaized.net/clip-home/c/read/v2/VOD_ALPHA/clip-home/30DFBBD26488ED537D389B5051667AA86F18/trailer/1770023178713/7fc2332b-0016-11f1-9788-48df37e2c054.mp4?hdnts=exp%3D1770928456%7Eacl%3D%2Fclip-home%2Fc%2Fread%2Fv2%2FVOD_ALPHA%2Fclip-home%2F30DFBBD26488ED537D389B5051667AA86F18%2F*%7Ehmac%3D52a6f286856a3f841f05c2e15cac82f0ca3d0abffa568c56a03a1322ef694d07#tid=JYvJ3o5AGhEZQiSV3HtYmg"
+                            type="video/mp4">
+                    </video>
+                </div>
+                <div class="slide"
+                    style="background-image: url('https://search.pstatic.net/common/?src=https%3A%2F%2Fldb-phinf.pstatic.net%2F20240206_74%2F1707201014673wPFXl_JPEG%2FKakaoTalk_Photo_2024-02-06-15-30-00_009.jpeg');">
+                </div>
+                <div class="slide"
+                    style="background-image: url('https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyNjAxMjdfNzMg%2FMDAxNzY5NTAwMjQ0OTg5._27b3wsP0g2rEPjUZaepjk3XEcgSyMfS4jFgkqYO9DIg.dm1oxdw5eeGtydJSmtoY_HaqjKg81ZBRpXsTak0dmp0g.JPEG%2FKHJ03367.jpg%3Ftype%3Dw1500_60_sharpen');">
+                </div>
+            </div>
+            <button class="nav-arrow left" onclick="scrollH(this, -1)">❮</button>
+            <button class="nav-arrow right" onclick="scrollH(this, 1)">❯</button>
+            <div class="content">
+                <span class="badge">4. 한식당</span>
+                <h2>무간도</h2>
+                <p>한식의 품격을 높인 요리.<br>다리오의 새로운 해석.</p>
+                <a href="https://naver.me/5FmSTRQS" target="_blank" class="btn-map">지도 보기</a>
+            </div>
+        </section>
+
+        <!-- 5. Simon Steak -->
+        <section class="video-section">
+            <div class="slider-container" onscroll="updateArrows(this)">
+                <div class="slide">
+                    <video muted loop playsinline class="bg-video">
+                        <source
+                            src="https://a02-g-smp-vod.akamaized.net/clip-home/c/read/v2/VOD_ALPHA/clip-home/FFBA35E96E581D5BF6EA64BAEDD96BED6A22/trailer/1770269155960/36c977b4-0253-11f1-8aa2-80615f0bcc6a.mp4?hdnts=exp%3D1770929064%7Eacl%3D%2Fclip-home%2Fc%2Fread%2Fv2%2FVOD_ALPHA%2Fclip-home%2FFFBA35E96E581D5BF6EA64BAEDD96BED6A22%2F*%7Ehmac%3Da90e7f7c5edb90e16502b1c4a13f1c9bd6397814d761adf3f83083aa06f29a2f#tid=klmCVBL1yv4ERer726hu8g"
+                            type="video/mp4">
+                    </video>
+                </div>
+                <div class="slide">
+                    <video muted loop playsinline class="bg-video">
+                        <source
+                            src="https://a02-g-smp-vod.akamaized.net/moment/a/read/v2/VOD_ALPHA/moment/25C0D6F0AAB9FCE82108994D9E29BBA102C3/trailer/1770639696003/3879896c-05b3-11f1-a719-a0369ffbdb30.mp4?hdnts=exp%3D1770929064%7Eacl%3D%2Fmoment%2Fa%2Fread%2Fv2%2FVOD_ALPHA%2Fmoment%2F25C0D6F0AAB9FCE82108994D9E29BBA102C3%2F*%7Ehmac%3D50ba644f74f41fa60b188533423e81e74622b32024997da1fe4dcd28947f00e2#tid=INQc4wOd1ql6dnvcIKknxg"
+                            type="video/mp4">
+                    </video>
+                </div>
+                <div class="slide"
+                    style="background-image: url('https://search.pstatic.net/common/?src=https%3A%2F%2Fldb-phinf.pstatic.net%2F20250228_3%2F1740737708573IfISH_JPEG%2F225-%25BB%25E7%25C0%25CC%25B8%25D5_%25C8%25AB%25BA%25B8%25BF%25EB-57804589125.jpg');">
+                </div>
+                <div class="slide"
+                    style="background-image: url('https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyNTEyMzFfNzYg%2FMDAxNzY3MTcwNTI2Nzc5.gxc_p9E4EXKOxAP1_x15MdArHKX9RZ-L4oj_ajkeeQwg.OaKJiNc1IrnROpWqKLzgfJdsVX18ljw4Ee5OeA0hXvMg.JPEG%2F20251230_203357.jpg.jpg%3Ftype%3Dw1500_60_sharpen');">
+                </div>
+            </div>
+            <button class="nav-arrow left" onclick="scrollH(this, -1)">❮</button>
+            <button class="nav-arrow right" onclick="scrollH(this, 1)">❯</button>
+            <div class="content">
+                <span class="badge">5. 스테이크</span>
+                <h2>사이먼스테이크</h2>
+                <p>롯데백화점 울산점에서 만나는<br>프리미엄 스테이크의 진수.</p>
+                <a href="https://naver.me/xWTnpHRV" target="_blank" class="btn-map">지도 보기</a>
+            </div>
+        </section>
+
+        <!-- 6. The Teppan -->
+        <section class="video-section">
+            <div class="slider-container" onscroll="updateArrows(this)">
+                <div class="slide">
+                    <video muted loop playsinline class="bg-video">
+                        <source
+                            src="https://a02-g-smp-vod.akamaized.net/moment/a/read/v2/VOD_ALPHA/moment/9EA4158E79DA7F5C86FE70EF0E65DEB3D16C/trailer/1753928458678/708c3edd-6db6-11f0-ba0a-a0369ffdba50.mp4?hdnts=exp%3D1770926815%7Eacl%3D%2Fmoment%2Fa%2Fread%2Fv2%2FVOD_ALPHA%2Fmoment%2F9EA4158E79DA7F5C86FE70EF0E65DEB3D16C%2F*%7Ehmac%3D5067105eb80b9486ca71062081abab76f4b29b748d5561b4c5d24a07b6c5f26c#tid=qFfyPgerMsksZvAzN5V8ig"
+                            type="video/mp4">
+                    </video>
+                </div>
+                <div class="slide">
+                    <video muted loop playsinline class="bg-video">
+                        <source
+                            src="https://a02-g-smp-vod.akamaized.net/moment/a/read/v2/VOD_ALPHA/moment_2024_07_05_0/f2cbf27c-3a63-11ef-9604-a0369ffdb0c0.mp4?hdnts=exp%3D1770928097%7Eacl%3D%2Fmoment%2Fa%2Fread%2Fv2%2FVOD_ALPHA%2Fmoment_2024_07_05_0%2F*%7Ehmac%3D1901afd2a89568fc0bc4639622a56c9f2df97b5a89da5b995f3935d0f5282a2f#tid=oTYaGItrnsMaFiZKdKDGsw"
+                            type="video/mp4">
+                    </video>
+                </div>
+                <div class="slide"
+                    style="background-image: url('https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyNDA4MDlfMjAx%2FMDAxNzIzMjAwNDE4NzYz.gXqcN9B_bhRaJBf-N1NVMaen5GRmSt-BDAinQio7sbEg.3RvnVhQhOGhSs9eg7v5u2AD30qP_7mpkKujF4Nacez8g.JPEG%2FF9CA4CDE-A4D2-4887-A65B-4130A42A7755.jpeg%3Ftype%3Dw1500_60_sharpen');">
+                </div>
+                <div class="slide"
+                    style="background-image: url('https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyNTAyMTNfNDMg%2FMDAxNzM5NDEwMTg0NDgy.OZHL3zU9mVK8FhOj8YDPG0nhDc3xJDjFMs5fYcgbcBIg.wclhMtWQFZqQ43Via3_yG6pK4mnStjTYx9xsuplyVpYg.JPEG%2F8A4D5E55-ED19-4B95-BEBF-41DFB0926F2C.jpeg%3Ftype%3Dw1500_60_sharpen');">
+                </div>
+            </div>
+            <button class="nav-arrow left" onclick="scrollH(this, -1)">❮</button>
+            <button class="nav-arrow right" onclick="scrollH(this, 1)">❯</button>
+            <div class="content">
+                <span class="badge">6. 일식당</span>
+                <h2>더데판</h2>
+                <p>눈과 입이 즐거운<br>철판 요리의 화려한 퍼포먼스.</p>
+                <a href="https://naver.me/5ne4gsKj" target="_blank" class="btn-map">지도 보기</a>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const vContainer = document.getElementById('vertical-container');
+        const progress = document.getElementById('progress');
+
+        // Observer to handle video autoplay
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const videos = entry.target.querySelectorAll('video');
+                if (entry.isIntersecting) {
+                    videos.forEach(video => {
+                        video.play().catch(e => console.log('Autoplay blocked:', e));
+                    });
+                } else {
+                    videos.forEach(video => {
+                        video.pause();
+                        video.currentTime = 0; // Optional: Reset video
+                    });
+                }
+            });
+        }, {
+            threshold: 0.6 // Play ONLY when 60% visible
+        });
+
+        document.querySelectorAll('.video-section').forEach(section => {
+            observer.observe(section);
+        });
+
+        vContainer.addEventListener('scroll', () => {
+            const scrollTop = vContainer.scrollTop;
+            const scrollHeight = vContainer.scrollHeight - vContainer.clientHeight;
+            const scrollFraction = scrollTop / scrollHeight;
+            progress.style.width = (scrollFraction * 100) + '%';
+        });
+
+        // Horizontal Scroll Logic
+        function scrollH(btn, direction) {
+            const section = btn.parentElement;
+            const container = section.querySelector('.slider-container');
+            const scrollAmount = container.clientWidth;
+            container.scrollBy({
+                left: direction * scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+
+        // Button Visibility Logic
+        function updateArrows(container) {
+            const section = container.parentElement;
+            const leftArrow = section.querySelector('.nav-arrow.left');
+            const rightArrow = section.querySelector('.nav-arrow.right');
+
+            if (!leftArrow || !rightArrow) return;
+
+            // Use a small tolerance for scroll detection
+            const isAtStart = container.scrollLeft < 10;
+            const isAtEnd = (container.scrollLeft + container.clientWidth) >= (container.scrollWidth - 10);
+
+            leftArrow.style.opacity = isAtStart ? '0' : '1';
+            leftArrow.style.pointerEvents = isAtStart ? 'none' : 'auto';
+
+            rightArrow.style.opacity = isAtEnd ? '0' : '1';
+            rightArrow.style.pointerEvents = isAtEnd ? 'none' : 'auto';
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.slider-container').forEach(updateArrows);
+        });
+    </script>
+
+</body>
+
+</html>
